@@ -1,23 +1,35 @@
 module.exports = function(app, db) {
 
-	//return JSON of all courses matched with query string
-	//possible query string parameters: semester, number, professor, title, summary, rating
+	//return JSON data of all courses matched with query string
+	//possible query string parameters: semester, number, professor, title (for exact matches), titleAny (non-exact), summary, rating
 	//e.g GET /course?=semester=Fall+2016&title=Organic+Chemistry+I
 	app.get("/courses", (req, res) => {
-		var courseQuery = req.query;
-		convertToCourseQuery(courseQuery);
+		if (Object.keys(req.query).length == 0) res.send([]); //if user supplies no paramaters, return no matches
 
-		db.collection("Courses").find(courseQuery).toArray((err, data) => {
-			if(err) {
-				res.send({"error": "Could not return courses"});
-			} else {
-				res.send(data);
-			}
-		});
+		else {
+			var courseQuery = req.query;
+			convertToCourseQuery(courseQuery);
+
+			db.collection("Courses").find(courseQuery).toArray((err, data) => {
+				if(err) {
+					res.send([{"error": "Could not return courses"}]);
+				} else {
+					res.send(data);
+				}
+			});
+		}
 	});
 
-	//takes query string object from GET requests and converts it to courseQuery object that can query database
+	//takes query string object converts it to courseQuery object that can query database
 	function convertToCourseQuery(courseQuery) {
+
+		if (courseQuery.hasOwnProperty("titleAny")) {
+			//create regex for finding non-exact course title matches
+			var regexString = ".*" + escapeRegExp(courseQuery.titleAny) + ".*";
+			var re = new RegExp(regexString, "i");
+			delete courseQuery.titleAny;
+			courseQuery.title = re; //if user has included both titleAny and title parameters, titleAny takes precedence
+		}
 
 		if (courseQuery.hasOwnProperty("professor")) {
 			//checking to see if professor specified is full name or first initial/remaining name
@@ -49,8 +61,9 @@ module.exports = function(app, db) {
 
 	}
 
+	//escape special regex characters from text
 	function escapeRegExp(text) {
- 		return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+ 		return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 	}
 
 }

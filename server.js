@@ -10,9 +10,7 @@ MongoClient.connect(db.URI, (err, database) => {
 
 	require("./routes/course_routes.js")(app, database)
 
-	app.listen(port, () => {
-		console.log("Succesful connecton!")
-	});
+	app.listen(port);
 
 });
 

@@ -6,6 +6,7 @@ module.exports = function(app, db) {
 	app.get("/courses", (req, res) => {
 		var courseQuery = req.query;
 		convertToCourseQuery(courseQuery);
+
 		db.collection("Courses").find(courseQuery).toArray((err, data) => {
 			if(err) {
 				res.send({"error": "Could not return courses"});
@@ -24,19 +25,32 @@ module.exports = function(app, db) {
 			if (names.length >= 1 && names[0].endsWith(".")) {
 				//construct regex to find matches of first initial and remaining name
 				var firstInitial = names.shift().charAt(0);
-				var remainingName = names.join(" ");
-				var regexString = firstInitial + ".+ " + remainingName; 
+				var remainingName = escapeRegExp(names.join(" "));
+				var regexString = firstInitial + ".* " + remainingName; 
 				var re = new RegExp(regexString);
 				courseQuery.professor = re;
-			} 
+			} else if (names.length == 1) {
+				//regex to search for any matches
+				var regexString = ".*" + escapeRegExp(names[0]) + ".*";
+				var re = new RegExp(regexString);
+				courseQuery.professor = re;
+			}
 		}
 
 		if (courseQuery.hasOwnProperty("number")) {
 			//construct regex for course numbers
-
+			var number = courseQuery.number;
+			if (number.length >= 10) {
+				var regexString = escapeRegExp(number.substring(0,10)) + ".*";
+				var re = new RegExp(regexString);
+				courseQuery.number = re;
+			}
 		}
 
 	}
 
+	function escapeRegExp(text) {
+ 		return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+	}
 
 }

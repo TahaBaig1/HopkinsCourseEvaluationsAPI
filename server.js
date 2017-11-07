@@ -1,12 +1,12 @@
 const express = require("express");
 const MongoClient = require("mongodb").MongoClient;
-const db = require("./config/db")
+const db = require("./config/db.js")
 
 const app = express();
 const port = 8000;
 
 MongoClient.connect(db.URI, (err, database) => {
-	if(err) return console.log(err);
+	if (err) return console.log(err);
 
 	require("./routes/course_routes.js")(app, database)
 

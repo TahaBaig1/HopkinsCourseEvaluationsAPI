@@ -10,10 +10,11 @@ module.exports = function(app, db) {
 			var courseQuery = req.query;
 			convertToCourseQuery(courseQuery);
 
-			db.collection("Courses").find(courseQuery).toArray((err, data) => {
+			db.collection("Courses").find(courseQuery, { "_id": false }).toArray((err, data) => {
 				if (err) {
 					res.send([{"error": "Could not return courses"}]);
 				} else {
+					data.sort(compareCoursesBySemester)
 					res.send(data);
 				}
 			});
@@ -35,7 +36,7 @@ module.exports = function(app, db) {
 		if (courseQuery.hasOwnProperty("professor")) {
 			//checking to see if professor specified is full name or first initial/remaining name
 			var names = courseQuery.professor.split(" ");
-			if (names.length >= 1 && names[0].endsWith(".")) {
+			if (names.length >= 1 && names[0].length == 2 && names[0].endsWith(".")) {
 				//construct regex to find matches of first initial and remaining name
 				var firstInitial = names.shift().charAt(0);
 				var remainingName = escapeRegExp(names.join(" "));
@@ -60,8 +61,8 @@ module.exports = function(app, db) {
 				courseQuery.number = re;
 			} else { 
 				//if non-exact course numbers are supplied (length less than 10), 
-				//create regex to find any matches using beginning of supplied number
-				var regexString = escapeRegExp(number) + ".*";
+				//create regex to find any matches using supplied number
+				var regexString = ".*" + escapeRegExp(number) + ".*";
 				var re = new RegExp(regexString);
 				courseQuery.number = re;
 			}
@@ -72,6 +73,28 @@ module.exports = function(app, db) {
 	//escape special regex characters from text
 	function escapeRegExp(text) {
  		return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+	}
+
+	//comparison function to sort courses in order by most recent semester first
+	function compareCoursesBySemester(c1, c2) {
+		if (!c1.hasOwnProperty("semester") || !c2.hasOwnProperty("semester")) return 0;
+
+		if (c1.semester === c2.semester) return 0;
+
+		semester1 = c1.semester.split(" ");
+		semester2 = c2.semester.split(" ");
+
+		if (semester1.length != 2 || semester2.length != 2) return 0;
+
+		//comparing year
+		if (semester1[1] > semester2[1]) return -1;
+		else if (semester1[1] < semester2[1]) return 1;
+		else {
+			//if years are equal, compare season
+			if (semester1[0] === "Fall")   return -1;
+			else 						   return 1;
+		}
+
 	}
 
 }

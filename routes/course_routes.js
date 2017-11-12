@@ -2,7 +2,7 @@ module.exports = function(app, db) {
 
 	//return JSON data of all courses matched with query string
 	//possible query string parameters: semester, number, professor, title (for exact matches), titleAny (non-exact), summary, rating
-	//e.g GET /course?=semester=Fall+2016&title=Organic+Chemistry+I
+	//e.g GET /courses?=semester=Fall+2016&title=Organic+Chemistry+I
 	app.get("/courses", (req, res) => {
 		if (Object.keys(req.query).length == 0) res.send([]); //if user supplies no parameters, return no matches
 

@@ -1,16 +1,14 @@
 const express = require("express");
 const MongoClient = require("mongodb").MongoClient;
-const db = require("./config/db.js")
 
 const app = express();
-const port = 8000;
 
-MongoClient.connect(db.URI, (err, database) => {
+MongoClient.connect(process.env.DB_URI, (err, database) => {
 	if (err) return console.log(err);
 
 	require("./routes/course_routes.js")(app, database)
 
-	app.listen(port);
+	app.listen(process.env.PORT || 8000);
 
 });
 

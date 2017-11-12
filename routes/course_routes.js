@@ -68,6 +68,11 @@ module.exports = function(app, db) {
 			}
 		}
 
+		//convert rating string to float
+		if (courseQuery.hasOwnProperty("rating")) {
+			courseQuery.rating = parseFloat(courseQuery.rating);
+		}
+
 	}
 
 	//escape special regex characters from text
@@ -87,12 +92,12 @@ module.exports = function(app, db) {
 		if (semester1.length != 2 || semester2.length != 2) return 0;
 
 		//comparing year
-		if (semester1[1] > semester2[1]) return -1;
+		if (semester1[1] > semester2[1]) 	  return -1;
 		else if (semester1[1] < semester2[1]) return 1;
 		else {
 			//if years are equal, compare season
-			if (semester1[0] === "Fall")   return -1;
-			else 						   return 1;
+			if (semester1[0] === "Fall") return -1;
+			else 						 return 1;
 		}
 
 	}

@@ -20,7 +20,7 @@ At least one parameter must be used in order to get results.
 
 Example usage:
 
-GET https://jhu-course-evaluations.herokuapp.com/courses?=semester=Fall+2016&title=Organic+Chemistry+I
+GET https://jhu-course-evaluations.herokuapp.com/courses?semester=Fall+2016&title=Organic+Chemistry+I
 
 
 

@@ -1,5 +1,10 @@
 module.exports = function(app, db) {
 
+	//returns text file explaining usage of API
+	app.get("/", (req, res) => {
+		res.sendFile("usage.txt", {"root": __dirname + "/../public"});
+	});
+
 	//return JSON data of all courses matched with query string
 	//possible query string parameters: semester, number, professor, title (for exact matches), titleAny (non-exact), summary, rating
 	//e.g GET /courses?=semester=Fall+2016&title=Organic+Chemistry+I

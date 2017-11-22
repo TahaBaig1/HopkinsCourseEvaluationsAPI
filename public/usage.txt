@@ -1,0 +1,28 @@
+Course Evaluations Data for Johns Hopkins
+
+Usage:
+
+API Endpoint - GET https://jhu-course-evaluations.herokuapp.com/courses
+
+Accepted query string parameters for finding courses:
+
+• semester - Semester in which the course was taught. Must be in the following format: Season Year (where Season is either Fall or Spring)
+• number - Any part of a course number e.g EN.100.120 or 100.120
+• professor - Name of professor. Accepted formats: First Name + Last Name, First Initial + Last Name, and part of name.
+• title - Exact course title
+• titleAny - Parts of course title
+• rating - Rating of course (decimal values between 0 and 5 inclusive)
+• summary - Summary of student comments
+
+At least one parameter must be used in order to get results.
+
+
+
+Example usage:
+
+GET https://jhu-course-evaluations.herokuapp.com/courses?=semester=Fall+2016&title=Organic+Chemistry+I
+
+
+
+Results are returned in a JSON format.
+

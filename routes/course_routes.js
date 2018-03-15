@@ -19,7 +19,7 @@ module.exports = function(app, db) {
 				if (err) {
 					res.send([{"error": "Could not return courses"}]);
 				} else {
-					data.sort(compareCoursesBySemester)
+					data.sort(compareCoursesBySemester);
 					res.send(data);
 				}
 			});
@@ -39,22 +39,20 @@ module.exports = function(app, db) {
 		}
 
 		if (courseQuery.hasOwnProperty("professor")) {
-			//checking to see if professor specified is full name or first initial/remaining name
-			var names = courseQuery.professor.split(" ");
-			if (names.length >= 1 && names[0].length == 2 && names[0].endsWith(".")) {
-				//construct regex to find matches of first initial and remaining name
-				var firstInitial = names.shift().charAt(0);
-				var remainingName = escapeRegExp(names.join(" "));
-				var regexString = firstInitial + ".* " + remainingName; 
-				var re = new RegExp(regexString);
-				courseQuery.professor = re;
-			} else if (names.length == 1) {
-				//regex to search for any matches
-				var regexString = ".*" + escapeRegExp(names[0]) + ".*";
-				var re = new RegExp(regexString, "i");
-				courseQuery.professor = re;
+			//check if professor query is a comma seperated list of professors
+			//(this case occurs for courses taught by multiple instructors)
+			var profs = courseQuery.professor.split(",");
+			var substrings = [];
+			for (var i = 0; i < profs.length; i++) {
+				substrings.push(convertToProfQuery(profs[i].trim()) + ".*,.*");
 			}
-		}
+			var profQueryString = substrings.join("");
+			profQueryString = profQueryString.slice(0, -5);
+
+			//create final regex
+			var re = new RegExp(profQueryString);
+			courseQuery.professor = re;
+		} 
 
 		if (courseQuery.hasOwnProperty("number")) {
 			//construct regex for course numbers
@@ -78,6 +76,22 @@ module.exports = function(app, db) {
 			courseQuery.rating = parseFloat(courseQuery.rating);
 		}
 
+	}
+
+	function convertToProfQuery(professorName) {
+		//checking to see if professor specified is full name or first initial/remaining name
+		var names = professorName.split(" ");
+		if (names.length >= 1 && names[0].length == 2 && names[0].endsWith(".")) {
+			//construct regex to find matches of first initial and remaining name
+			var firstInitial = names.shift().charAt(0);
+			var remainingName = escapeRegExp(names.join(" "));
+			var regexString = firstInitial + ".* " + remainingName; 
+			return regexString;
+		} else if (names.length == 1) {
+			//regex to search for any matches
+			var regexString = ".*" + escapeRegExp(names[0]) + ".*";
+			return regexString;
+		}		
 	}
 
 	//escape special regex characters from text

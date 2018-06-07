@@ -15,6 +15,9 @@ module.exports = function(app, db) {
 			var courseQuery = req.query;
 			convertToCourseQuery(courseQuery);
 
+			// check if all properties were deleted in conversion function
+			if (Object.keys(courseQuery).length == 0) return res.send([]);
+
 			db.collection("Courses").find(courseQuery, { "_id": false }).toArray((err, data) => {
 				if (err) {
 					res.send([{"error": "Could not return courses"}]);
@@ -28,6 +31,14 @@ module.exports = function(app, db) {
 
 	//takes query string object converts it to courseQuery object that can query database
 	function convertToCourseQuery(courseQuery) {
+		// loop through properties, delete any that length of 0
+		for (var prop in courseQuery) {
+			if (courseQuery.hasOwnProperty(prop)) {
+				if (courseQuery[prop].length == 0) {
+					delete courseQuery[prop];
+				}
+			}
+		}
 
 		if (courseQuery.hasOwnProperty("titleAny")) {
 			//create regex for finding non-exact course title matches
@@ -81,17 +92,20 @@ module.exports = function(app, db) {
 	function convertToProfQuery(professorName) {
 		//checking to see if professor specified is full name or first initial/remaining name
 		var names = professorName.split(" ");
+		var regexString = "";
 		if (names.length >= 1 && names[0].length == 2 && names[0].endsWith(".")) {
 			//construct regex to find matches of first initial and remaining name
 			var firstInitial = names.shift().charAt(0);
 			var remainingName = escapeRegExp(names.join(" "));
-			var regexString = firstInitial + ".* " + remainingName; 
-			return regexString;
+			regexString = firstInitial + ".* " + remainingName; 
+		} else if (names.length > 1) {
+			regexString = professorName;
 		} else if (names.length == 1) {
 			//regex to search for any matches
-			var regexString = ".*" + escapeRegExp(names[0]) + ".*";
-			return regexString;
+			regexString = ".*" + escapeRegExp(names[0]) + ".*";
 		}		
+
+		return regexString;
 	}
 
 	//escape special regex characters from text
@@ -108,7 +122,7 @@ module.exports = function(app, db) {
 		semester1 = c1.semester.split(" ");
 		semester2 = c2.semester.split(" ");
 
-		if (semester1.length != 2 || semester2.length != 2) return 0;
+		if (semester1.length !== 2 || semester2.length != 2) return 0;
 
 		//comparing year
 		if (semester1[1] > semester2[1]) 	  return -1;

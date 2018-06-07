@@ -8,7 +8,7 @@ Accepted query string parameters for finding courses:
 
 • semester - Semester in which the course was taught. Must be in the following format: Season Year (where Season is either Fall or Spring)
 • number - Any part of a course number e.g EN.100.120 or 100.120
-• professor - Name of professor. Accepted formats: First Name + Last Name, First Initial + Last Name, and part of name.
+• professor - Name of professor. Accepted formats: First Name + Last Name, First Initial + Last Name, and part of name. Comma seperated list of any of these is allowed to search for a course that has multiple instructors.
 • title - Exact course title
 • titleAny - Parts of course title
 • rating - Rating of course (decimal values between 0 and 5 inclusive)
